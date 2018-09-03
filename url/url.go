@@ -6,16 +6,9 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"syscall"
 
 	"golang.org/x/net/html"
 )
-
-var max_goroutines = func() uint64 {
-	var rLimit syscall.Rlimit
-	syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-	return rLimit.Max
-}
 
 // Helper function to pull the href attribute from a Token
 func getHref(t html.Token) (ok bool, href string) {
@@ -96,7 +89,7 @@ func Test(urlsFoundPerFile map[string][]string, excludedUrls []string) (map[stri
 
 	var wg sync.WaitGroup
 	var mutex = &sync.Mutex{}
-	goroutines := make(chan struct{}, max_goroutines())
+	goroutines := make(chan struct{}, 100)
 	for filename, urls := range urlsFoundPerFile {
 		for _, url := range urls {
 			if urlsScanned[url] == nil {
@@ -123,6 +116,7 @@ func Test(urlsFoundPerFile map[string][]string, excludedUrls []string) (map[stri
 	}
 
 	wg.Wait()
+	close(goroutines)
 
 	return urlsScanned, urlsError
 }
