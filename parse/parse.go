@@ -1,7 +1,7 @@
 package parse
 
 import (
-	"io/ioutil"
+	"bufio"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,11 +24,20 @@ func HTMLFiles(searchDir string) ([]string, error) {
 }
 
 func ExceptionFile(filename string) ([]string, error) {
-	content, err := ioutil.ReadFile(filename)
+	var exceptions []string
+	file, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	exceptions := strings.Split(string(content), "\n")
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" {
+			exceptions = append(exceptions, line)
+		}
+	}
 
 	return exceptions, nil
 }
