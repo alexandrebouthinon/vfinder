@@ -42,43 +42,20 @@ func Extract(filename string) ([]string, error) {
 			return urls, nil
 		case tt == html.StartTagToken:
 			t := tkz.Token()
-
 			// Check if the token is an <a> tag
-			isAnchor := t.Data == "a"
-			if !isAnchor {
+			if isAnchor := t.Data == "a"; !isAnchor {
 				continue
 			}
-
 			// Extract the href value, if there is one
 			ok, url := getHref(t)
 			if !ok {
 				continue
 			}
-
 			// Make sure the url begines in http**
-			hasProto := strings.Index(url, "http") == 0
-			if hasProto {
+			if strings.Index(url, "http") == 0 {
 				urls = append(urls, url)
 			}
 		}
-	}
-}
-
-// Report the analyze result
-func Report(urlsError map[string]bool, urlsScanned map[string][]string) {
-	fmt.Println("\033[33m", len(urlsScanned), "\033[0mURLs Scanned")
-	fmt.Println("\033[31m", len(urlsError), "\033[0mURLs Errored")
-
-	if len(urlsError) != 0 {
-		fmt.Println("\n========================== \033[31mErroneous URLs\033[0m ==========================\033[31m")
-		for url := range urlsError {
-			fmt.Println(url, "referenced in:")
-			for _, filename := range urlsScanned[url] {
-				fmt.Println("\t->", filename)
-			}
-		}
-		fmt.Println("\033[0m====================================================================")
-		os.Exit(1)
 	}
 }
 
@@ -99,8 +76,7 @@ func Test(urlsFoundPerFile map[string][]string, excludedUrls []string) (map[stri
 				goroutines <- struct{}{}
 				wg.Add(1)
 				go func(url, filename string) {
-					_, err := http.Head(url)
-					if err != nil {
+					if _, err := http.Head(url); err != nil {
 						mutex.Lock()
 						urlsError[url] = true
 						mutex.Unlock()
@@ -114,7 +90,6 @@ func Test(urlsFoundPerFile map[string][]string, excludedUrls []string) (map[stri
 			}
 		}
 	}
-
 	wg.Wait()
 	close(goroutines)
 
@@ -130,6 +105,5 @@ func Filter(urlsError map[string]bool, excludedUrls []string) map[string]bool {
 			}
 		}
 	}
-
 	return urlsError
 }

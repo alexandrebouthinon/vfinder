@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 
+	"github.com/alexandrebouthinon/vfinder/output"
 	"github.com/alexandrebouthinon/vfinder/parse"
 	"github.com/alexandrebouthinon/vfinder/url"
 )
@@ -13,19 +13,10 @@ var (
 	directoryRoot *string
 	targetFile    *string
 	exceptionFile *string
-	help          *bool
 )
 
-func printHeader() {
-	fmt.Println("\n\t\t _    _________           __")
-	fmt.Println("\t\t| |  / / ____(_)___  ____/ /__  _____")
-	fmt.Println("\t\t| | / / /_  / / __ \\/ __  / _ \\/ ___/")
-	fmt.Println("\t\t| |/ / __/ / / / / / /_/ /  __/ /")
-	fmt.Print("\t\t|___/_/   /_/_/ /_/\\__,_/\\___/_/\n\n")
-}
-
 func init() {
-	printHeader()
+	output.PrintHeader()
 	directoryRoot = flag.String("d", "", "A directory location as a string, this directory or sub-directories should contain HTML files to analize.")
 	targetFile = flag.String("f", "", "A file path as a string, This file should contain HTML code.")
 	exceptionFile = flag.String("x", "", "An exception filename as a string, this file sould contains prefix that need to be ignored in parsing.")
@@ -56,7 +47,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("\033[32m", len(filesFound), "\033[0mHTML files found")
+		output.PrintFilesFound(len(filesFound))
 		for _, f := range filesFound {
 			urls, err := url.Extract(f)
 			if err != nil {
@@ -80,5 +71,5 @@ func main() {
 	}
 
 	// Scan report
-	url.Report(urlsError, urlsScanned)
+	output.ReportURLs(urlsError, urlsScanned)
 }

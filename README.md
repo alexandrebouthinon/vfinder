@@ -2,8 +2,31 @@
 
 __Find and report dead links in HTML files.__
 
+[![GitHub license](https://img.shields.io/github/license/alexandrebouthinon/vfinder.svg)](https://github.com/alexandrebouthinon/vfinder/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alexandrebouthinon/vfinder)](https://goreportcard.com/report/github.com/alexandrebouthinon/vfinder)
+
 ## Why ?
 Because it's annoying to have some dead links in our web pages.
+
+
+## Installation
+
+### Using sources
+
+Install Golang, clone the repository and build:
+```
+$ git clone https://github.com/alexandrebouthinon/vfinder
+$ cd vfinder
+$ go build
+```
+
+### Using __go get__
+
+If you have a fully configured Golang environment, set up and add your `GOBIN` to your `PATH`. Finally, just run:
+```
+$ go get github.com/alexandrebouthinon/vfinder
+$ go install github.com/alexandrebouthinon/vfinder
+```
 
 ## Usage
 
@@ -64,8 +87,28 @@ or a complete directory:
 $ vfinder -d mywebsite/build -x exceptions.txt
 ```
 
+## Docker image
+
+If you don't want to install Golang, you can use the Docker image.
+It's the recommended way to use Kuttlefish when you want to use it in your CI system
+
+* Pull the image
+```
+$ docker pull alexandrebouthinon/vfinder
+```
+
+* Use it:
+```
+docker run --rm -it -v /absolute/path/to/directory:/mnt alexandrebouthinon/vfinder vfinder \
+        -d /mnt/build \
+        -x /mnt/exceptions.txt
+
+```
+
 ## Author
 
-Alexandre Bouthinon (@alexandrebouthinon)
+Alexandre BOUTHINON [(@alexandrebouthinon)](https://github.com/alexandrebouthinon)
 
-_Special thanks to @scottinet for performances improvements_
+_Special thanks to_ [@scottinet](https://github.com/scottinet) _for performances improvements_
+
+##  [MIT LICENSE](https://github.com/alexandrebouthinon/vfinder/raw/master/LICENSE)
