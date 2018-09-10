@@ -13,6 +13,7 @@ var (
 	directoryRoot *string
 	targetFile    *string
 	exceptionFile *string
+	exportFile    *string
 )
 
 func init() {
@@ -20,11 +21,13 @@ func init() {
 	directoryRoot = flag.String("d", "", "A directory location as a string, this directory or sub-directories should contain HTML files to analize.")
 	targetFile = flag.String("f", "", "A file path as a string, This file should contain HTML code.")
 	exceptionFile = flag.String("x", "", "An exception filename as a string, this file sould contains prefix that need to be ignored in parsing.")
+	exportFile = flag.String("export", "", "Export report to the provided JSON file instead of STDOUT.")
 }
 
 func main() {
 	var urlsFoundPerFile = make(map[string][]string)
 	var excludedUrls = make([]string, 0)
+	var filesFound = make([]string, 0)
 	var err error
 
 	flag.Parse()
@@ -43,11 +46,11 @@ func main() {
 	}
 
 	if *directoryRoot != "" {
-		filesFound, err := parse.HTMLFiles(*directoryRoot)
+		filesFound, err = parse.HTMLFiles(*directoryRoot)
 		if err != nil {
 			panic(err)
 		}
-		output.PrintFilesFound(len(filesFound))
+
 		for _, f := range filesFound {
 			urls, err := url.Extract(f)
 			if err != nil {
@@ -60,6 +63,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		filesFound = append(filesFound, *targetFile)
 		urlsFoundPerFile[*targetFile] = urls
 	}
 
@@ -71,5 +75,16 @@ func main() {
 	}
 
 	// Scan report
-	output.ReportURLs(urlsError, urlsScanned)
+	output.ReportURLsSTDOUT(len(filesFound), len(urlsError), len(urlsScanned))
+	if *exportFile != "" {
+		err := output.ReportURLsJSON(len(filesFound), len(urlsError), len(urlsScanned), *exportFile)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if len(urlsError) != 0 {
+		output.ShowDetails(urlsScanned, urlsError)
+		os.Exit(1)
+	}
 }
